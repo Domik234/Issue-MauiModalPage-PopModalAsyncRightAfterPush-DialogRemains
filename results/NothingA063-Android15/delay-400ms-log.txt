@@ -1,0 +1,2 @@
+[REPRO] delay before pop = 400 ms, modal.IsLoaded at pop = True, ModalStack = 0, modal dialogs still showing = 0
+app windows (dumpsys window): 1
