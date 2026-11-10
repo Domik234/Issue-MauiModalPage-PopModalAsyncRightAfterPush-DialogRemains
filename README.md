@@ -66,6 +66,13 @@ It works on 10.0.20 and is broken from 10.0.30 on (the "10.0 SR3" milestone of d
 Log lines: [`results/NothingA063-Android15/`](results/NothingA063-Android15) (`delay-<ms>ms-log.txt`). The same behaviour was seen with MAUI 10.0.110 and in a larger app (FormsDSH sample, plain `ContentPage`
 without any popup).
 
+## iOS
+
+Not reproducible on iOS. The same test (no delay, 3 runs, and 1000 ms, 1 run) with MAUI 10.0.130 on an iPhone 16e (iOS 27.2, physical device) and on the iPhone 17 simulator (iOS 26.5):
+`modal.IsLoaded` is `True` at Pop, `Navigation.ModalStack.Count` is 0 and no view controller is left presented. The Android-only difference is that the modal page is not yet `Loaded` at Pop.
+This project targets only `net10.0-android`; the iOS runs used a copy of it with `net10.0-ios`, a delay taken from an environment variable and a check of the `PresentedViewController` chain
+(not part of this repository).
+
 ## Cause (from the MAUI sources and the state of the app after the call)
 
 `ModalNavigationManager.PopModalAsync` (identical in MAUI 10.0.110 and 10.0.130):

@@ -60,6 +60,8 @@ The deferred `SyncModalStackWhenPlatformIsReadyAsync` / `SyncPlatformModalStackA
 `_platformModalPages`), but its handler was just disconnected by `RemoveLogicalChild`, so the condition can never become true and the platform pop
 (`dialogFragment.Dismiss()`) is never executed.
 
+On iOS the same sequence is fine: the modal page is already `Loaded` when `PopModalAsync` is called, so the platform pop is not skipped (see "Affected platforms").
+
 The relevant code is identical in 10.0.110 and 10.0.130 (`ModalNavigationManager.cs` unchanged, `ModalNavigationManager.Android.cs` only adds a check in `ModalFragment.OnCreateView`).
 
 Possible fix: either make `PushModalAsync(animated: false)` also wait until the modal page is `Loaded`, or make the deferred pop independent of the popped page's handler
@@ -106,11 +108,16 @@ Yes, this used to work in .NET MAUI
 
 Android
 
-(I was *not* able to test on other platforms: the reproduction project targets only `net10.0-android`.)
+Not reproducible on iOS (tested, see below). Windows and macOS (Mac Catalyst) were *not* tested: the reproduction project targets only `net10.0-android`.
+
+iOS check: the same test (`await PushModalAsync(modal, false); await PopModalAsync(false);`, 3 runs with no delay and 1 run with 1000 ms) with MAUI 10.0.130 on an iPhone 16e (iOS 27.2, physical device)
+and on the iPhone 17 simulator (iOS 26.5). Every run ends with `modal.IsLoaded == True` at Pop, `ModalStack.Count == 0` and no view controller left presented
+(`PresentedViewController` chain of the key window's root view controller is empty; the screenshot on the simulator shows no modal either). This was run with a copy of the repro project that targets `net10.0-ios`;
+only the scripted start (delay from an environment variable) and the check for leftover presented view controllers differ from the Android project.
 
 ### Affected platform versions
 
-Android 15 (Nothing Phone A063, physical device); also seen in a larger app on a physical device
+Android 15 (Nothing Phone A063, physical device); also seen in a larger app on a physical device. Not affected: iOS 27.2 (iPhone 16e) and iOS 26.5 (simulator).
 
 ### Did you find any workaround?
 
